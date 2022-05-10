@@ -1,11 +1,32 @@
-import express from 'express';
-import bodyParser from 'body-parser';
-import Puppeteer from 'puppeteer';
-import {
+const express = require( 'express' );
+const bodyParser = require( 'body-parser' );
+const Puppeteer = require( 'puppeteer' );
+const {
   JSDOM,
   VirtualConsole,
-} from 'jsdom';
-import { urlResolver } from './lib/url.mjs';
+} = require( 'jsdom' );
+
+const hasProtocol = ( uri ) => /^https?:\/\//gm.test( uri );
+const linkIsAbsolute = ( uri ) => /^https?:\/\/(?:\w+?\.){1,9}\w+\/?|^(?:\w+?\.){1,9}\w+\/?/gm.test( uri );
+const trimSlashes = ( url ) => url.replace( /^\/{2,}|\/+$/g, '' );
+const urlResolver = ( uri, hostname = null ) => {
+  try {
+    uri = trimSlashes( uri );
+    if ( !hasProtocol( uri ) ) {
+      if ( linkIsAbsolute( uri ) ) {
+        console.log( 'link is absolute' );
+        return [new URL( `https://${uri}` ).href, null];
+      } else {
+        if ( !hostname ) throw new Error( `${uri} requires a hostname to resolve.` );
+        return [new URL( `https://${hostname}/${uri}` ).href, null];
+      }
+    } else {
+      return [new URL( uri ).href, null];
+    }
+  } catch ( err ) {
+    return [uri, err];
+  }
+};
 
 const app = express();
 const port = 3000;
