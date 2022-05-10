@@ -42,9 +42,7 @@ const urlResolver = ( uri, hostname = null ) => {
   const here = [];
 
   here.push( 'init browser' );
-  const browser = await puppeteer.launch( {
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  } );
+  const browser = await puppeteer.launch();
 
 
   app.get( '/', async ( req, res ) => {
