@@ -4,11 +4,8 @@ import Puppeteer from 'puppeteer';
 import {
   JSDOM,
   VirtualConsole,
-  ResourceLoader
 } from 'jsdom';
-import fetch from 'node-fetch';
 import { urlResolver } from './lib/url.js';
-import { CustomResourceLoader } from './lib/CustomResourceLoader.js';
 
 const app = express();
 const port = 1337;
@@ -26,7 +23,6 @@ app.get( '/', async ( req, res ) => {
   if ( !target || urlResolverErr ) {
     return res.status( 422 ).json( 'Must provide a valid URL.' );
   }
-  const hostname = new URL( target ).hostname;
 
   const browser = await Puppeteer.launch();
   const page = await browser.newPage();
@@ -34,50 +30,33 @@ app.get( '/', async ( req, res ) => {
   const html = await page.content();
   await browser.close();
 
-  return res.send( html );
-
-  /* console.log( hostname );
-
-  const response = await fetch( target );
-  const text = await response.text();
-
   const virtualConsole = new VirtualConsole();
   virtualConsole.on( "error", () => { } ); // No-op to skip console errors.
 
-  const resourceLoader = new ResourceLoader( {
-    proxy: `https://${hostname}`,
-    strictSSL: true,
-    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0",
-  } );
-
-  const dom = new JSDOM( text, {
-    runScripts: "dangerously",
-    resources: new CustomResourceLoader( {
-      proxy: `https://${hostname}`,
-      strictSSL: true,
-      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0",
-    } )
+  const dom = new JSDOM( html, {
+    virtualConsole
   } );
   if ( !dom ) {
     return res.status( 500 ).json( 'Failed to create vDOM. :c' );
   }
- */
-  /* const scripts = Array.from( dom.window.document.querySelectorAll( 'script' ) ).map( script => {
-    if ( !script.src ) return script;
-    let [goodUrl, err] = urlResolver( script.src, hostname );
-    if ( goodUrl && err === null ) {
-      script.src = goodUrl;
-    }
-    return script;
-  } );
 
-  const links = Array.from( dom.window.document.querySelectorAll( 'link[rel="stylesheet"]' ) ).map( link => {
-    let [goodUrl, err] = urlResolver( link.href, hostname );
-    if ( goodUrl && err === null ) {
-      link.href = goodUrl;
+  const scripts = Array.from( dom.window.document.querySelectorAll( 'script' ) );
+  for ( const script of scripts ) {
+    if ( script.parentNode ) {
+      script.parentNode.removeChild( script );
     }
-    return link;
-  } ); */
+  }
+
+  const styles = Array.from( dom.window.document.querySelectorAll( 'link[rel="stylesheet"],style' ) );
+  for ( const style of styles ) {
+    if ( style.parentNode ) {
+      style.parentNode.removeChild( style );
+    }
+  }
+
+  const body = dom.window.document.querySelector( 'body' );
+
+  return res.send( body?.innerHTML || '' );
 } );
 
 app.listen( port, () => {
