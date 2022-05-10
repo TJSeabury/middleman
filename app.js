@@ -52,7 +52,9 @@ app.get( '/', async ( req, res ) => {
 
     try {
       here.push( 'init browser' );
-      const browser = await puppeteer.launch();
+      const browser = await puppeteer.launch( {
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      } );
       here.push( 'new page' );
       const page = await browser.newPage();
       here.push( 'navigate to page' );
