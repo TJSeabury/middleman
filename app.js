@@ -52,11 +52,13 @@ app.get( '/', async ( req, res ) => {
 
     here.push( 'init browser' );
     const browser = await puppeteer.launch();
+    here.push( 'new page' );
     const page = await browser.newPage();
-    await page.goto( target, { waitUntil: 'networkidle0' } );
     here.push( 'navigate to page' );
-    const html = await page.content();
+    await page.goto( target, { waitUntil: 'networkidle0' } );
     here.push( 'get content' );
+    const html = await page.content();
+    here.push( 'close browser' );
     await browser.close();
 
     const virtualConsole = new VirtualConsole();
