@@ -1,4 +1,5 @@
 const express = require( 'express' );
+const cors = require( 'cors' );
 const bodyParser = require( 'body-parser' );
 const puppeteer = require( 'puppeteer' );
 const {
@@ -30,6 +31,8 @@ const urlResolver = ( uri, hostname = null ) => {
 
 const app = express();
 const port = 3000;
+
+app.use( cors() );
 
 // support parsing of application/json type post data
 //app.use( bodyParser.json() );
