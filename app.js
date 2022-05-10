@@ -28,92 +28,80 @@ const urlResolver = ( uri, hostname = null ) => {
   }
 };
 
+const app = express();
+const port = 3000;
+
+// support parsing of application/json type post data
+//app.use( bodyParser.json() );
+app.use( bodyParser.text() );
+
+//support parsing of application/x-www-form-urlencoded post data
+app.use( bodyParser.urlencoded( { extended: true } ) );
+
 ( async () => {
-  const here = [];
+  // check if this even works on start.
+  const browser = await puppeteer.launch();
+  await browser.close();
+} )();
+
+const here = [];
+
+app.get( '/', async ( req, res ) => {
+  const url = req.query?.url;
+  here.push( 'url: ' + url );
+  const [target, urlResolverErr] = urlResolver( url );
+  here.push( 'target: ' + target + ' ; urlResolverErr' + urlResolverErr );
+  if ( !target || urlResolverErr ) {
+    return res.status( 422 ).json( 'Must provide a valid URL.' );
+  }
 
   here.push( 'init browser' );
-  const browser = await puppeteer.launch();
-  try {
-    const app = express();
-    const port = 3000;
+  const browser = await puppeteer.launch( {
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  } );
+  here.push( 'new page' );
+  const page = await browser.newPage();
+  here.push( 'navigate to page' );
+  await page.goto( target, { waitUntil: 'networkidle0' } );
+  here.push( 'get content' );
+  const html = await page.content();
+  here.push( 'close browser' );
+  await browser.close();
 
-    // support parsing of application/json type post data
-    //app.use( bodyParser.json() );
-    app.use( bodyParser.text() );
+  const virtualConsole = new VirtualConsole();
+  virtualConsole.on( "error", () => { } ); // No-op to skip console errors.
 
-    //support parsing of application/x-www-form-urlencoded post data
-    app.use( bodyParser.urlencoded( { extended: true } ) );
-
-
-
-    app.get( '/', async ( req, res ) => {
-      const url = req.query?.url;
-      here.push( 'url: ' + url );
-      const [target, urlResolverErr] = urlResolver( url );
-      here.push( 'target: ' + target + ' ; urlResolverErr' + urlResolverErr );
-      if ( !target || urlResolverErr ) {
-        return res.status( 422 ).json( 'Must provide a valid URL.' );
-      }
-
-      try {
-        here.push( 'new page' );
-        const page = await browser.newPage();
-        here.push( 'navigate to page' );
-        await page.goto( target, { waitUntil: 'networkidle0' } );
-        here.push( 'get content' );
-        const html = await page.content();
-        here.push( 'close page' );
-        page.close();
-      } catch ( err ) {
-        here.push( browser );
-      }
-
-      const virtualConsole = new VirtualConsole();
-      virtualConsole.on( "error", () => { } ); // No-op to skip console errors.
-
-      const dom = new JSDOM( html, {
-        virtualConsole
-      } );
-      here.push( 'start jsdom' );
-      if ( !dom ) {
-        return res.status( 500 ).json( 'Failed to create vDOM. :c' );
-      }
-
-      here.push( 'strip scripts' );
-      const scripts = Array.from( dom.window.document.querySelectorAll( 'script' ) );
-      for ( const script of scripts ) {
-        if ( script.parentNode ) {
-          script.parentNode.removeChild( script );
-        }
-      }
-
-      here.push( 'strip styles' );
-      const styles = Array.from( dom.window.document.querySelectorAll( 'link[rel="stylesheet"],style' ) );
-      for ( const style of styles ) {
-        if ( style.parentNode ) {
-          style.parentNode.removeChild( style );
-        }
-      }
-
-      here.push( 'extract modded body' );
-      const body = dom.window.document.querySelector( 'body' );
-
-      here.push( 'return' );
-      return res.status( 200 ).json( body?.innerHTML || '' );
-
-    } );
-
-    app.listen( port, () => {
-      console.log( `Example app listening on port ${port}` );
-    } );
-
-  } catch ( err ) {
-    return res.status( 500 ).json( {
-      error: err,
-      message: "There has apperently been an error.",
-      here
-    } );
-  } finally {
-    await browser.close();
+  const dom = new JSDOM( html, {
+    virtualConsole
+  } );
+  here.push( 'start jsdom' );
+  if ( !dom ) {
+    return res.status( 500 ).json( 'Failed to create vDOM. :c' );
   }
-} )();
+
+  here.push( 'strip scripts' );
+  const scripts = Array.from( dom.window.document.querySelectorAll( 'script' ) );
+  for ( const script of scripts ) {
+    if ( script.parentNode ) {
+      script.parentNode.removeChild( script );
+    }
+  }
+
+  here.push( 'strip styles' );
+  const styles = Array.from( dom.window.document.querySelectorAll( 'link[rel="stylesheet"],style' ) );
+  for ( const style of styles ) {
+    if ( style.parentNode ) {
+      style.parentNode.removeChild( style );
+    }
+  }
+
+  here.push( 'extract modded body' );
+  const body = dom.window.document.querySelector( 'body' );
+
+  here.push( 'return' );
+  return res.status( 200 ).json( body?.innerHTML || '' );
+} );
+
+app.listen( port, () => {
+  console.log( `Example app listening on port ${port}` );
+} );
