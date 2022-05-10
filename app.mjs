@@ -5,7 +5,7 @@ import {
   JSDOM,
   VirtualConsole,
 } from 'jsdom';
-import { urlResolver } from './lib/url.js';
+import { urlResolver } from './lib/url.mjs';
 
 const app = express();
 const port = 3000;
