@@ -80,7 +80,10 @@ app.get( '/', async ( req, res ) => {
 
     return res.status( 200 ).json( body?.innerHTML || '' );
   } catch ( err ) {
-    return res.status( 500 ).json( err );
+    return res.status( 500 ).json( {
+      error: err,
+      message: "There has apperently been an error."
+    } );
   }
 } );
 
