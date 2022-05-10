@@ -29,6 +29,10 @@ const urlResolver = ( uri, hostname = null ) => {
 };
 
 ( async () => {
+  const here = [];
+
+  here.push( 'init browser' );
+  const browser = await puppeteer.launch();
   try {
     const app = express();
     const port = 3000;
@@ -40,10 +44,7 @@ const urlResolver = ( uri, hostname = null ) => {
     //support parsing of application/x-www-form-urlencoded post data
     app.use( bodyParser.urlencoded( { extended: true } ) );
 
-    const here = [];
 
-    here.push( 'init browser' );
-    const browser = await puppeteer.launch();
 
     app.get( '/', async ( req, res ) => {
       const url = req.query?.url;
