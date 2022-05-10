@@ -1,6 +1,6 @@
 const express = require( 'express' );
 const bodyParser = require( 'body-parser' );
-const Puppeteer = require( 'puppeteer' );
+const puppeteer = require( 'puppeteer' );
 const {
   JSDOM,
   VirtualConsole,
@@ -51,7 +51,7 @@ app.get( '/', async ( req, res ) => {
     }
 
     here.push( 'init browser' );
-    const browser = await Puppeteer.launch();
+    const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.goto( target, { waitUntil: 'networkidle0' } );
     here.push( 'navigate to page' );
