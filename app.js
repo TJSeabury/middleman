@@ -8,7 +8,7 @@ import {
 import { urlResolver } from './lib/url.js';
 
 const app = express();
-const port = 1337;
+const port = 3000;
 
 // support parsing of application/json type post data
 //app.use( bodyParser.json() );
