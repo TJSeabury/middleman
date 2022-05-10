@@ -29,24 +29,23 @@ const urlResolver = ( uri, hostname = null ) => {
 };
 
 ( async () => {
-  const app = express();
-  const port = 3000;
+  try {
+    const app = express();
+    const port = 3000;
 
-  // support parsing of application/json type post data
-  //app.use( bodyParser.json() );
-  app.use( bodyParser.text() );
+    // support parsing of application/json type post data
+    //app.use( bodyParser.json() );
+    app.use( bodyParser.text() );
 
-  //support parsing of application/x-www-form-urlencoded post data
-  app.use( bodyParser.urlencoded( { extended: true } ) );
+    //support parsing of application/x-www-form-urlencoded post data
+    app.use( bodyParser.urlencoded( { extended: true } ) );
 
-  const here = [];
+    const here = [];
 
-  here.push( 'init browser' );
-  const browser = await puppeteer.launch();
+    here.push( 'init browser' );
+    const browser = await puppeteer.launch();
 
-
-  app.get( '/', async ( req, res ) => {
-    try {
+    app.get( '/', async ( req, res ) => {
       const url = req.query?.url;
       here.push( 'url: ' + url );
       const [target, urlResolverErr] = urlResolver( url );
@@ -100,16 +99,20 @@ const urlResolver = ( uri, hostname = null ) => {
 
       here.push( 'return' );
       return res.status( 200 ).json( body?.innerHTML || '' );
-    } catch ( err ) {
-      return res.status( 500 ).json( {
-        error: err,
-        message: "There has apperently been an error.",
-        here
-      } );
-    }
-  } );
 
-  app.listen( port, () => {
-    console.log( `Example app listening on port ${port}` );
-  } );
+    } );
+
+    app.listen( port, () => {
+      console.log( `Example app listening on port ${port}` );
+    } );
+
+  } catch ( err ) {
+    return res.status( 500 ).json( {
+      error: err,
+      message: "There has apperently been an error.",
+      here
+    } );
+  } finally {
+    await browser.close();
+  }
 } )();
