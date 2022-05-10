@@ -62,7 +62,7 @@ app.get( '/', async ( req, res ) => {
       here.push( 'close browser' );
       await browser.close();
     } catch ( err ) {
-      here.push( err );
+      here.push( browser );
     }
 
     const virtualConsole = new VirtualConsole();
