@@ -1,8 +1,13 @@
+import { env } from 'node:process';
+const mode = env.NODE_ENV;
+
+const host = mode == 'production' ? 'https://middleman.marketmentors.com' : 'http://localhost:3000';
+
 (async (d, w) => {
   const replacableNode = d.querySelector(`.rates-container.replacable`);
   const target =
     "https://consumer.optimalblue.com/FeaturedRates?GUID=b61565e4-69f1-4e5e-94cf-c9500181ed78";
-  const url = `https://middleman.marketmentors.com/cornerstone-rates/?url=${target}`;
+  const url = `${host}/cornerstone-rates/?url=${target}`;
   const res = await fetch(url);
   if (!replacableNode || res.status !== 200)
     return console.error("No node or response.");

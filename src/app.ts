@@ -8,6 +8,10 @@ import basicHandler from './routeHandlers/basic';
 
 import cornerstoneBankRatesHandler from './routeHandlers/cornerstoneBankRates';
 
+import { env } from 'node:process';
+
+const mode = env.NODE_ENV;
+
 const app = express();
 const port = 3000;
 
