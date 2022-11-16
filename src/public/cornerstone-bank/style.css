@@ -1,0 +1,48 @@
+.panel.widgetContainer {
+  width: 100% !important;
+}
+
+.panel-body.widgetContainerBody {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.panel.innerContainer {
+  width: fit-content;
+  padding: 1rem;
+}
+
+.widgetDate {
+  display: block;
+  width: 100%;
+}
+
+.innerHeadingTitle_small {
+  background-color: var(--wp--preset--color--secondary);
+  color: white;
+  padding: 0.25rem 1rem;
+}
+
+.table.table-condensed.ratesTable {
+  margin: 0 !important;
+}
+
+table.table.table-condensed.ratesTable td {
+  min-width: 5vw;
+  padding: 4px 12px;
+}
+
+.widgetHeaderTitle {
+  padding: 1rem;
+  font-size: 2rem;
+}
+
+.btn.btn-block.externalLink.ng-binding.ng-scope {
+  background-color: rgb(77, 14, 8);
+  color: rgb(255, 255, 255);
+  border: rgb(77, 14, 8);
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  text-decoration: none;
+}
