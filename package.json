@@ -3,9 +3,10 @@
   "version": "1.1.0",
   "description": "",
   "main": "app.js",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
-    "run": "node app.js",
+    "build": "npx tsc",
+    "run": "npx tsc && node ./build/app.js",
     "watch": "nodemon --ignore public ./app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
