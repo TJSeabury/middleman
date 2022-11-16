@@ -2,7 +2,7 @@ import fs from 'fs';
 import express from "express";
 import cors from "cors";
 import bodyParser from 'body-parser';
-import * as puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer';
 
 import basicHandler from './routeHandlers/basic';
 

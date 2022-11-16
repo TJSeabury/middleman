@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import * as puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer';
 import {
   extractDom,
   stripScriptsAndStyles,
