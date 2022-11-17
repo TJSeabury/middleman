@@ -1,7 +1,7 @@
 import {
   extractDom,
   stripScriptsAndStyles,
-} from '../lib/dom';
+} from '../../lib/dom';
 import { isErr } from "@sniptt/monads";
 import {
   btoa,

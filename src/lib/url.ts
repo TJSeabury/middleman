@@ -1,4 +1,5 @@
-import { Result, Ok, Err } from "@sniptt/monads";
+import { Ok, Err } from "@sniptt/monads";
+import type { Result } from "@sniptt/monads";
 
 export function hasProtocol(uri: string): boolean {
   return /^https?:\/\//gm.test(uri);

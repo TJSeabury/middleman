@@ -3,7 +3,7 @@ import puppeteer from 'puppeteer';
 import {
   extractDom,
   stripScriptsAndStyles,
-} from '../lib/dom';
+} from '../../lib/dom';
 import { urlResolver } from '../lib/url';
 import { isErr } from "@sniptt/monads";
 import { DOMMutator, PageManipulator } from "../lib/typesAndInterfaces";
