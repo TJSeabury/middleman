@@ -4,9 +4,9 @@ import cors from "cors";
 import bodyParser from 'body-parser';
 import puppeteer from 'puppeteer';
 
-import basicHandler from './routeHandlers/basic';
+import basicHandler from '../lib/routeHandlers/basic';
 
-import cornerstoneBankRatesHandler from './routeHandlers/cornerstoneBankRates';
+import cornerstoneBankRatesHandler from '../lib/routeHandlers/cornerstoneBankRates';
 
 import { env } from 'node:process';
 

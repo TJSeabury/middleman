@@ -1,5 +1,5 @@
-import { JSDOM } from 'jsdom';
-import { Browser, Page } from 'puppeteer';
+import type { JSDOM } from 'jsdom';
+import type { Browser, Page } from 'puppeteer';
 
 export type PageManipulator = (page: Page, browser: Browser) => Promise<void>;
 

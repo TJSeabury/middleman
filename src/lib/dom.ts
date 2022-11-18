@@ -1,5 +1,6 @@
 import { JSDOM, VirtualConsole } from "jsdom";
-import { Result, Ok, Err } from "@sniptt/monads";
+import { Ok, Err } from "@sniptt/monads";
+import type { Result } from "@sniptt/monads";
 import { pipe } from "./general";
 
 

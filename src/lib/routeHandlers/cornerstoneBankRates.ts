@@ -1,13 +1,13 @@
 import {
   extractDom,
   stripScriptsAndStyles,
-} from '../../lib/dom';
+} from '../dom';
 import { isErr } from "@sniptt/monads";
 import {
   btoa,
-} from '../lib/general'
+} from '../general'
 import handlerBuilder from "./handlerBuilder";
-import { Browser, Page } from 'puppeteer';
+import type { Browser, Page } from 'puppeteer';
 
 const cornerstoneBankRatesHandler = handlerBuilder(
   async (page: Page, browser: Browser) => {
