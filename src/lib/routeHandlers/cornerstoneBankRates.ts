@@ -13,7 +13,9 @@ import type { Browser, Page } from 'puppeteer';
 /**
  * The browser page manipulator.
  * 
+ * Intended to be used to perform actions on a given page.
  * Puppeteer's Browser and Page are available for manipution here.
+ * This callback function is invoked after network is idle.
  * 
  * @param page 
  * @param browser 
@@ -48,6 +50,11 @@ const manipulator = async (page: Page, browser: Browser) => {
 };
 
 /**
+ * The DOM Mutator.
+ * 
+ * Intended to be used to format or clean the DOM before sending in Response.
+ * This callback function is invoked after page manipulation has occured 
+ * and after scripts and styles have been stripped.
  * 
  * @param dom 
  * @returns 
