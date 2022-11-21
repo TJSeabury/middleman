@@ -6,6 +6,7 @@ import { isErr } from "@sniptt/monads";
 import {
   btoa,
 } from '../general'
+import type { JSDOM } from 'jsdom';
 import handlerBuilder from "./handlerBuilder";
 import type { Browser, Page } from 'puppeteer';
 
@@ -37,6 +38,35 @@ const cornerstoneBankRatesHandler = handlerBuilder(
       body = btoa(body);
       await link.evaluate((a, html) => a.setAttribute('data-html-b64', html), body);
     }
+  },
+  (dom: JSDOM) => {
+    const replacableNode = dom.window.document.querySelector(`.rates-container.replacable`);
+    if (!replacableNode) return dom;
+    const panels = replacableNode.querySelectorAll('.panel');
+    if (panels) {
+      for (const panel of panels) {
+        panel.setAttribute('style', '');
+      }
+    }
+    const date = replacableNode.querySelector('.widgetDate');
+    if (date) {
+      date.innerHTML = new Date().toLocaleString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        timeZone: 'America/New_York'
+      });
+    }
+    const button = replacableNode.querySelector(
+      '.panel-body.widgetContainerBody .btn.btn-block.externalLink'
+    );
+    if (button) {
+      button.setAttribute('style', '');
+    }
+    return dom;
   }
 );
 
