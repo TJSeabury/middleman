@@ -53,15 +53,16 @@ const manipulator = async (page: Page, browser: Browser) => {
  * @returns 
  */
 const mutator = (dom: JSDOM): JSDOM => {
-  const replacableNode = dom.window.document.querySelector(`.rates-container.replacable`);
-  if (!replacableNode) return dom;
-  const panels = replacableNode.querySelectorAll('.panel');
+  /* const replacableNode = dom.window.document.querySelector(`.rates-container.replacable`);
+  if (!replacableNode) return dom; */
+  const doc = dom.window.document;
+  const panels = doc.querySelectorAll('.panel');
   if (panels) {
     for (const panel of panels) {
       panel.setAttribute('style', '');
     }
   }
-  const date = replacableNode.querySelector('.widgetDate');
+  const date = doc.querySelector('.widgetDate');
   if (date) {
     date.innerHTML = new Date().toLocaleString('en-US', {
       weekday: 'long',
@@ -73,7 +74,7 @@ const mutator = (dom: JSDOM): JSDOM => {
       timeZone: 'America/New_York'
     });
   }
-  const button = replacableNode.querySelector(
+  const button = doc.querySelector(
     '.panel-body.widgetContainerBody .btn.btn-block.externalLink'
   );
   if (button) {
