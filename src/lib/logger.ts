@@ -34,15 +34,15 @@ export default function withLogger(f: FunctionVariadicAnyReturn, filename: strin
   };
 
   const logPath = path.resolve('logs/log.txt');
-  const warnPath = path.resolve('logs/log.txt');
-  const errorPath = path.resolve('logs/log.txt');
+  const warnPath = path.resolve('logs/warn.txt');
+  const errorPath = path.resolve('logs/error.txt');
 
-  return (...args) => {
+  return async (...args) => {
     console.log = (message?: any, ...optionalParams: any[]) => {
       // if (isNotProduction()) log(`Yeehaa, override! --[ ${message} ]--`);
       fs.appendFile(
         logPath,
-        `<LOG>[${new Date().toUTCString()}]--{ ${message} }-- IN "${filename}"\n`,
+        `<LOG>[${new Date().toUTCString()}]--{\n${message}\n}-- IN "${filename}"\n\n`,
         writeError
       );
     };
@@ -51,7 +51,7 @@ export default function withLogger(f: FunctionVariadicAnyReturn, filename: strin
       // if (isNotProduction()) warn(`Yeehaa, override! --[ ${message} ]--`);
       fs.appendFile(
         warnPath,
-        `<WARN>[${new Date().toUTCString()}]--{ ${message} }-- IN "${filename}"\n`,
+        `<WARN>[${new Date().toUTCString()}]--{\n${message}\n}-- IN "${filename}"\n\n`,
         writeError
       );
     };
@@ -60,7 +60,7 @@ export default function withLogger(f: FunctionVariadicAnyReturn, filename: strin
       // if (isNotProduction()) error(`Yeehaa, override! --[ ${message} ]--`);
       fs.appendFile(
         errorPath,
-        `<ERROR>[${new Date().toUTCString()}]--{ ${message} }-- IN "${filename}"\n`,
+        `<ERROR>[${new Date().toUTCString()}]--{\n${message}\n}-- IN "${filename}"\n\n`,
         writeError
       );
     };
@@ -75,7 +75,7 @@ export default function withLogger(f: FunctionVariadicAnyReturn, filename: strin
       );
     }; */
 
-    const result = f(...args);
+    const result = await f(...args);
 
     console.log = log;
     console.warn = warn;
