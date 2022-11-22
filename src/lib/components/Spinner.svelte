@@ -1,6 +1,10 @@
 <script lang="ts">
+	import { wait } from '$lib/general';
+
 	export let message: string;
 	export let color: string;
+	export let comment: string;
+	export let longWaitComment: string;
 </script>
 
 <figure class="spinner" style="--color:{color};">
@@ -9,6 +13,11 @@
 		<div class="spinner-outer" />
 		<div class="spinner-inner" />
 	</div>
+	{#await wait(4000)}
+		<p>{comment}</p>
+	{:then a}
+		<p>{longWaitComment}</p>
+	{/await}
 </figure>
 
 <style>
@@ -26,7 +35,7 @@
 		position: relative;
 		width: 64px;
 		height: 64px;
-		margin-top: 16px;
+		margin: 16px 0;
 	}
 	.spinner-outer,
 	.spinner-inner {

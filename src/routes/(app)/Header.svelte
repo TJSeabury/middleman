@@ -22,6 +22,9 @@
 			<li aria-current={$page.url.pathname === '/preview' ? 'page' : undefined}>
 				<a href="/preview">Preview</a>
 			</li>
+			<li aria-current={$page.url.pathname === '/CornerstoneBankRates' ? 'page' : undefined}>
+				<a href="/CornerstoneBankRates">Cornerstone Bank Rates</a>
+			</li>
 			<li aria-current={$page.url.pathname === '/about' ? 'page' : undefined}>
 				<a href="/about">About</a>
 			</li>

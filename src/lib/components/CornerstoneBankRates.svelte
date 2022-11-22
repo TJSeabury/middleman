@@ -1,81 +1,128 @@
 <script lang="ts">
 	import { dev } from '$app/environment';
-	import { wait } from '$lib/general';
 	import Spinner from '$lib/components/Spinner.svelte';
+	import RatesContainer from './RatesContainer.svelte';
+	import RateDetails, { open, close } from './RateDetails.svelte';
+	import type { Rates, RatesMatrix } from '$lib/typesAndInterfaces';
 
 	const host = !dev ? 'https://middleman.marketmentors.com' : 'http://localhost:5173';
 
-	const apiRequest = async () => {
+	type Button = {
+		url: string;
+		text: string;
+	};
+	type RatesData = {
+		title: string;
+		tables: RatesMatrix[];
+		disclaimer: string;
+		button: Button;
+	};
+
+	const apiRequest = async (): Promise<RatesData> => {
 		const target =
 			'https://consumer.optimalblue.com/FeaturedRates?GUID=b61565e4-69f1-4e5e-94cf-c9500181ed78';
-		const url = `${host}/api/cornerstoneBankRates/?url=${target}`;
+		const url = `${host}/api/cornerstonebank/rates/?url=${target}`;
 		const res = await fetch(url);
-		if (res.status !== 200) return console.error('No node or response.');
+		if (res.status !== 200) {
+			console.error('No node or response.');
+			throw new Error('No node or response.');
+		}
 		const data = await res.json();
-		return data;
+		const template = document.createElement('template');
+		template.innerHTML = data;
+
+		const title = template.querySelector('.widgetHeaderTitle')?.innerHTML || '';
+
+		const rawTables = Array.from(
+			template.querySelectorAll('.panel-body.widgetContainerBody .panel.innerContainer')
+		);
+		const tables = rawTables.map((element): RatesMatrix => {
+			const heading =
+				element.querySelector('.panel-heading.innerContainerHeader .innerHeadingTitle_small')
+					?.innerHTML || '';
+
+			const ratesTableRows = Array.from(element.querySelectorAll('.table.ratesTable tr.datarow'));
+			const ratesRows: Rates[] = ratesTableRows.map((row) => {
+				let td: Element[] | number[] = Array.from(row.querySelectorAll('td'));
+				td = td.map((td) => {
+					let maybeAnchor = td.querySelector('a');
+					if (maybeAnchor != null) {
+						return parseFloat(maybeAnchor.innerText);
+					}
+					return parseFloat(td.innerHTML);
+				});
+
+				let rateDetails = row.querySelector('td:last-of-type')?.innerHTML;
+				if (!rateDetails) {
+					throw new Error('No rate details found!');
+				}
+
+				return {
+					rate: td[0],
+					points: td[1],
+					apr: td[2],
+					details: rateDetails
+				};
+			});
+
+			return {
+				title: heading,
+				rates: ratesRows
+			};
+		});
+
+		const disclaimer = template.querySelector('.disclaimer')?.innerHTML || '';
+
+		const externalButton = template.querySelector('.btn.btn-block.externalLink');
+		const button = {
+			url: externalButton?.getAttribute('href') || '',
+			text: externalButton?.innerHTML || ''
+		};
+
+		return {
+			title: title,
+			tables: tables,
+			disclaimer: disclaimer,
+			button: button
+		};
 	};
 
 	let APIRequest = apiRequest();
+
+	/* (() => {
+		let expandables = document.querySelectorAll('[data-html-b64]');
+		for (const expandable of expandables) {
+			let html = atob(expandable.getAttribute('data-html-b64'));
+			expandable.addEventListener('click', () => {
+				detailsPane.innerHTML = html;
+				detailsPane.open();
+				const button = detailsPane.querySelector('.btn[type="button"]');
+				if (button) {
+					button.addEventListener('click', () => {
+						detailsPane.close();
+					});
+				} else {
+					console.log('.btn[type="button"] not found rate details.');
+				}
+			});
+		}
+	})(); */
 </script>
 
 {#await APIRequest}
-	<Spinner message="Please wait but a moment..." color="rgb(77, 14, 8)" />
-	{#await wait(4000)}
-		<span>This shouldn't take long.</span>
-	{:then a}
-		<span>Any second now...</span>
-	{/await}
-{:then rates}
-	<div class="rates-container replacable">{@html rates}</div>
-	<style>
-		.panel.widgetContainer {
-			width: 100% !important;
-		}
-
-		.panel-body.widgetContainerBody {
-			display: flex;
-			flex-wrap: wrap;
-			width: 100%;
-		}
-
-		.panel.innerContainer {
-			width: fit-content;
-			padding: 1rem;
-		}
-
-		.widgetDate {
-			display: block;
-			width: 100%;
-		}
-
-		.innerHeadingTitle_small {
-			background-color: var(--wp--preset--color--secondary);
-			color: white;
-			padding: 0.25rem 1rem;
-		}
-
-		.table.table-condensed.ratesTable {
-			margin: 0 !important;
-		}
-
-		table.table.table-condensed.ratesTable td {
-			min-width: 5vw;
-			padding: 4px 12px;
-			text-align: center;
-		}
-
-		.widgetHeaderTitle {
-			padding: 1rem;
-			font-size: 2rem;
-		}
-
-		.btn.btn-block.externalLink.ng-binding.ng-scope {
-			background-color: rgb(77, 14, 8);
-			color: rgb(255, 255, 255);
-			border: rgb(77, 14, 8);
-			padding: 1rem 2rem;
-			font-size: 1.2rem;
-			text-decoration: none;
-		}
-	</style>
+	<Spinner
+		message="Please wait but a moment..."
+		color="rgb(77, 14, 8)"
+		comment="This shouldn't take long."
+		longWaitComment="Any second now..."
+	/>
+{:then data}
+	<div>{JSON.stringify(data)}</div>
+	<RatesContainer
+		title={data.title}
+		disclaimerText={data.disclaimer}
+		externalLinkUrl={data.button.url}
+		externalLinkText={data.button.text}
+		ratesTables={data.tables}
+	/>
 {/await}

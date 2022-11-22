@@ -15,7 +15,8 @@ export default function handlerBuilder(
   return async function handler(routeParams: any) {
     const urlError = new Error('Must provide a valid URL.');
     const url = routeParams.url.searchParams.get('url');;
-    console.log(url);
+    console.log(JSON.stringify(routeParams));
+
     // If the type of url is anything but string, then it is a bad query param.
     if (typeof url !== 'string') {
       console.error(urlError);

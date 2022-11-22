@@ -32,7 +32,7 @@ const manipulator = async (page: Page, browser: Browser) => {
       target => x(target.page())
     ));
     const popup = await newPagePromise;
-    await popup.waitForNetworkIdle({ idleTime: 50 });
+    await popup.waitForNetworkIdle({ idleTime: 111 });
     const html = await popup.content();
 
     const extractResult = extractDom(html)
