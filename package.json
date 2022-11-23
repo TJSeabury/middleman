@@ -29,6 +29,7 @@
 	"type": "module",
 	"dependencies": {
 		"@sniptt/monads": "^0.5.10",
+		"buffer": "^6.0.3",
 		"jsdom": "^20.0.2",
 		"puppeteer": "^19.2.2"
 	}

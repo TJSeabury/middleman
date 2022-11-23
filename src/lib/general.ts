@@ -1,3 +1,5 @@
+import { Buffer } from "buffer";
+
 export const btoa = (str: string) => Buffer.from(str, 'utf8').toString('base64');
 
 export const atob = (str: string) => Buffer.from(str, 'base64').toString('utf8');

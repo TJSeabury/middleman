@@ -1,4 +1,6 @@
-<script lang="ts" context="module">
+<script lang="ts">
+	import { fly, fade } from 'svelte/transition';
+
 	let visible: boolean = false;
 
 	export function open() {
@@ -8,22 +10,21 @@
 	export function close() {
 		visible = false;
 	}
-</script>
-
-<script lang="ts">
-	import { fly } from 'svelte/transition';
 
 	export let content: any;
 </script>
 
 {#if visible}
-	<div id="details-pane" transition:fly={{ y: 100, duration: 500 }}>
-		{content}
+	<div class="overlay" transition:fade={{ duration: 500 }} />
+	<div id="details-pane" transition:fly={{ y: 100, duration: 400, delay: 300 }}>
+		{@html content}
+		<!-- svelte-ignore a11y-missing-attribute -->
+		<a class="close-button" role="button" on:click={close}> Close </a>
 	</div>
 {/if}
 
 <style>
-	.btn.btn-primary[type='button'] {
+	.close-button {
 		background-color: var(--cornerstonebank-red);
 		color: rgb(255, 255, 255);
 		border: var(--cornerstonebank-red);
@@ -31,6 +32,17 @@
 		font-size: 1.2rem;
 		text-decoration: none;
 		cursor: pointer;
+	}
+
+	.overlay {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: hsla(0, 0%, 100%, 0.85);
 	}
 
 	#details-pane {
@@ -42,7 +54,8 @@
 		background: hsla(0, 0%, 100%, 0.88);
 		display: flex;
 		justify-content: center;
-		align-items: center;
+		align-items: flex-end;
+		flex-direction: column;
 		padding: 2rem;
 		box-shadow: 0 0.25rem 1.25rem 0.25rem hsl(0deg 0% 0% / 30%);
 	}

@@ -1,12 +1,17 @@
 <script lang="ts">
 	import type { RatesMatrix } from '$lib/typesAndInterfaces';
 	import RatesTable from './RatesTable.svelte';
+	import RateDetails from './RateDetails.svelte';
+	import type { SvelteComponent } from 'svelte';
+	import { fly } from 'svelte/transition';
 
 	export let title: string;
+	export let ratesDate: string;
 	export let disclaimerText: string;
 	export let externalLinkUrl: string;
 	export let externalLinkText: string;
-	let date = new Date().toLocaleString('en-US', {
+
+	/* let date = new Date().toLocaleString('en-US', {
 		weekday: 'long',
 		year: 'numeric',
 		month: 'long',
@@ -14,20 +19,28 @@
 		hour: 'numeric',
 		minute: 'numeric',
 		timeZone: 'America/New_York'
-	});
+	}); */
 
 	export let ratesTables: RatesMatrix[];
+
+	let rateDetails: string = '';
+	let rateDetailsComponent: SvelteComponent;
+
+	function showDetails(details: string): void {
+		rateDetails = details;
+		rateDetailsComponent.open();
+	}
 </script>
 
-<div class="panel widgetContainer rates-container">
+<div class="panel widgetContainer rates-container" transition:fly={{ y: 100, duration: 500 }}>
 	<header class="panel-heading widgetHeader">
 		<h1 class="widgetHeaderTitle">{title}</h1>
-		<p class="widgetDate ">{date}</p>
+		<p class="widgetDate ">{ratesDate}</p>
 	</header>
 
 	<div class="panel-body widgetContainerBody">
 		{#each ratesTables as table}
-			<RatesTable data={table} />
+			<RatesTable data={table} {showDetails} />
 		{/each}
 
 		<p class="disclaimer ">
@@ -43,6 +56,7 @@
 			{externalLinkText}
 		</a>
 	</div>
+	<RateDetails bind:this={rateDetailsComponent} content={rateDetails} />
 </div>
 
 <style>
@@ -64,48 +78,23 @@
 	}
 
 	.panel-heading.widgetHeader {
+		display: flex;
+		align-items: center;
 		background-color: rgb(77, 14, 8);
 		color: rgb(0, 0, 0);
 	}
 	.widgetHeaderTitle {
+		width: 100%;
+		margin: 0;
 		color: rgb(255, 255, 255);
-	}
-
-	.panel.innerContainer {
-		width: fit-content;
-		padding: 1rem;
 	}
 
 	.widgetDate {
 		display: block;
 		width: 100%;
 		margin: 16px;
-	}
-
-	.innerHeadingTitle_small {
-		background-color: var(--cornerstonebank-blue);
 		color: white;
-		padding: 0.25rem 1rem;
-	}
-
-	.table .headerRow {
-		background-color: #ddd;
-	}
-	.table tr:nth-child(2n) {
-		background-color: #ddd;
-	}
-	.table tr:not(:last-child) {
-		border-bottom: 1px solid var(--border-color);
-	}
-
-	.table.table-condensed.ratesTable {
-		margin: 0 !important;
-	}
-
-	table.table.table-condensed.ratesTable td {
-		min-width: 5vw;
-		padding: 4px 12px;
-		text-align: center;
+		text-align: right;
 	}
 
 	.widgetHeaderTitle {
@@ -113,12 +102,8 @@
 		font-size: 2rem;
 	}
 
-	a.ng-binding {
-		color: var(--cornerstonebank-red);
-	}
-
 	.disclaimer {
-		margin: 16px;
+		margin: 0 0 32px 16px;
 	}
 
 	.btn.btn-block.externalLink {

@@ -32,7 +32,7 @@ const manipulator = async (page: Page, browser: Browser) => {
       target => x(target.page())
     ));
     const popup = await newPagePromise;
-    await popup.waitForNetworkIdle({ idleTime: 111 });
+    await popup.waitForNetworkIdle({ idleTime: 100 });
     const html = await popup.content();
 
     const extractResult = extractDom(html)
@@ -60,26 +60,12 @@ const manipulator = async (page: Page, browser: Browser) => {
  * @returns 
  */
 const mutator = (dom: JSDOM): JSDOM => {
-  /* const replacableNode = dom.window.document.querySelector(`.rates-container.replacable`);
-  if (!replacableNode) return dom; */
   const doc = dom.window.document;
   const panels = doc.querySelectorAll('.panel');
   if (panels) {
     for (const panel of panels) {
       panel.setAttribute('style', '');
     }
-  }
-  const date = doc.querySelector('.widgetDate');
-  if (date) {
-    date.innerHTML = new Date().toLocaleString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      timeZone: 'America/New_York'
-    });
   }
   const button = doc.querySelector(
     '.panel-body.widgetContainerBody .btn.btn-block.externalLink'
