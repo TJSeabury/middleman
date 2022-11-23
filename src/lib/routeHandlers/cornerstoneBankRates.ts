@@ -26,15 +26,19 @@ const manipulator = async (page: Page, browser: Browser) => {
     'a[ng-click]'
   );
   for (let i = 0, link = links[i]; i < links.length; ++i, link = links[i]) {
+    // click to open the popup
     await link.click();
-    const newPagePromise: Promise<Page> = new Promise(x => browser.once(
+
+    const newPagePromise: Promise<Page> = new Promise(resolve => browser.once(
       'targetcreated',
-      target => x(target.page())
+      target => resolve(target.page())
     ));
     const popup = await newPagePromise;
-    await popup.waitForNetworkIdle({ idleTime: 100 });
-    const html = await popup.content();
+    await popup.waitForSelector('.modal-body');
+    //await popup.waitForNetworkIdle({ idleTime: 100 });
 
+    // extract and save popup content
+    const html = await popup.content();
     const extractResult = extractDom(html)
       .andThen(stripScriptsAndStyles);
     if (isErr(extractResult)) {
