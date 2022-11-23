@@ -1,10 +1,19 @@
 <script lang="ts">
 	import { wait } from '$lib/general';
+	import { onMount } from 'svelte';
 
 	export let message: string;
 	export let color: string;
 	export let comment: string;
 	export let longWaitComment: string;
+
+	let counter: number = 0;
+
+	onMount(() => {
+		let interval = setInterval(() => {
+			counter += 10;
+		}, 10);
+	});
 </script>
 
 <figure class="spinner" style="--color:{color};">
@@ -12,10 +21,11 @@
 	<div class="spinner-container">
 		<div class="spinner-outer" />
 		<div class="spinner-inner" />
+		<div class="spinner-counter">{(counter / 1000).toFixed(2)}</div>
 	</div>
-	{#await wait(4000)}
+	{#await wait(6000)}
 		<p>{comment}</p>
-	{:then a}
+	{:then}
 		<p>{longWaitComment}</p>
 	{/await}
 </figure>
@@ -69,5 +79,19 @@
 		animation-fill-mode: forwards;
 		animation-play-state: running;
 		animation-direction: reverse;
+	}
+
+	.spinner-counter {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 100%;
+		height: 100%;
+		transform: translate(-50%, -50%);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		font-family: monospace;
+		opacity: 0.5;
 	}
 </style>
