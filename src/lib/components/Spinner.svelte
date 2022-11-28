@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { wait } from '$lib/general';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	export let message: string;
 	export let color: string;
@@ -9,10 +9,16 @@
 
 	let counter: number = 0;
 
+	let interval: NodeJS.Timer;
+
 	onMount(() => {
-		let interval = setInterval(() => {
+		interval = setInterval(() => {
 			counter += 10;
 		}, 10);
+	});
+
+	onDestroy(() => {
+		clearInterval(interval);
 	});
 </script>
 
@@ -92,6 +98,6 @@
 		justify-content: center;
 		align-items: center;
 		font-family: monospace;
-		opacity: 0.5;
+		opacity: 0.25;
 	}
 </style>
