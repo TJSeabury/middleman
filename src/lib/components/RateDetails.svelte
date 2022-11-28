@@ -19,6 +19,7 @@
 	<div id="details-pane" transition:fly={{ y: 100, duration: 400, delay: 300 }}>
 		{@html content}
 		<!-- svelte-ignore a11y-missing-attribute -->
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<a class="close-button" role="button" on:click={close}> Close </a>
 	</div>
 {/if}

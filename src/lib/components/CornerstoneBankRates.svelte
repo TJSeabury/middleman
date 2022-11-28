@@ -115,11 +115,11 @@
 </script>
 
 <div class="flex-container">
-	<iframe
+	<!-- <iframe
 		src="https://consumer.optimalblue.com/FeaturedRates?GUID=b61565e4-69f1-4e5e-94cf-c9500181ed78"
 		frameborder="0"
 		title="data master"
-	/>
+	/> -->
 	{#await APIRequest}
 		<Spinner
 			message="Please wait but a moment..."
@@ -142,10 +142,7 @@
 <style>
 	.flex-container {
 		display: flex;
+		justify-content: center;
 		align-items: flex-start;
-	}
-	iframe {
-		width: fit-content;
-		height: 100vw;
 	}
 </style>
