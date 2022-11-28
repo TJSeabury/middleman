@@ -13,8 +13,8 @@
 
 	export let showDetails: (details: string) => void;
 
-	function clickHandler() {
-		showDetails(data.rates[0].details);
+	function clickHandler(details: string): () => void {
+		return () => showDetails(details);
 	}
 </script>
 
@@ -39,14 +39,16 @@
 						<!-- svelte-ignore a11y-missing-attribute -->
 						<!-- svelte-ignore a11y-click-events-have-key-events -->
 						<td class="rate"
-							><a role="button" class="show-details" on:click={clickHandler}>{format(rate.rate)}</a
+							><a role="button" class="show-details" on:click={clickHandler(rate.details)}
+								>{format(rate.rate)}</a
 							></td
 						>
 						<td class="points">{format(rate.points)}</td>
 						<!-- svelte-ignore a11y-missing-attribute -->
 						<!-- svelte-ignore a11y-click-events-have-key-events -->
 						<td class="apr"
-							><a role="button" class="show-details" on:click={clickHandler}>{format(rate.apr)}</a
+							><a role="button" class="show-details" on:click={clickHandler(rate.details)}
+								>{format(rate.apr)}</a
 							></td
 						>
 					</tr>
