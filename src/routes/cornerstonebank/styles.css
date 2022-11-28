@@ -1,0 +1,26 @@
+@font-face {
+	font-family: 'Montserrat';
+	src: url('/fonts/Montserrat/Montserrat-VariableFont_wght.ttf') format('ttf') tech('variations'),
+		url('/fonts/Montserrat/Montserrat-VariableFont_wght.ttf') format('truetype-variations');
+	font-weight: 100 1000;
+	font-stretch: 25% 151%;
+}
+@font-face {
+	font-family: 'Montserrat';
+	src: url('/fonts/Montserrat/Montserrat-Italic-VariableFont_wght.ttf') format('ttf')
+			tech('variations'),
+		url('/fonts/Montserrat/Montserrat-Italic-VariableFont_wght.ttf') format('truetype-variations');
+	font-weight: 100 1000;
+	font-stretch: 25% 151%;
+	font-style: italic;
+}
+
+body {
+	margin: 0;
+	font-family: 'Montserrat', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
+		'Helvetica Neue', sans-serif;
+	font-size: 14px;
+	--wght: 550;
+	font-weight: var(--wght);
+	font-variation-settings: 'wght' var(--wght);
+}
