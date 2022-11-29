@@ -9,6 +9,25 @@ import {
 import type { JSDOM } from 'jsdom';
 import handlerBuilder from "./handlerBuilder";
 import type { Browser, Page } from 'puppeteer';
+import type { Rates, RatesMatrix } from '$lib/typesAndInterfaces';
+import { atob } from '$lib/general';
+
+type Button = {
+  url: string;
+  text: string;
+};
+
+type RatesData = {
+  title: string;
+  ratesDate: string;
+  tables: RatesMatrix[];
+  disclaimer: string;
+  button: Button;
+};
+
+function extractFragmentHTML(frag: DocumentFragment | HTMLElement) {
+  return [].map.call(frag.children, (element: HTMLElement) => element.outerHTML).join('\n');
+}
 
 /**
  * The browser page manipulator.
@@ -80,9 +99,90 @@ const mutator = (dom: JSDOM): JSDOM => {
   return dom;
 }
 
-const cornerstoneBankRatesHandler = handlerBuilder(
-  manipulator,
-  mutator
-);
+const cornerstoneBankRatesHandler = async (routeParams: any): Promise<RatesData> => {
+  const res = await handlerBuilder(
+    manipulator,
+    mutator
+  )(routeParams);
+
+  const data = await res.json();
+
+  const nodes = new DOMParser().parseFromString(data, 'text/html');
+  if (nodes == null) {
+    throw new Error('Failed to parse data!');
+  }
+  const fragment = new DocumentFragment();
+  fragment.append(nodes.firstChild || 'No nodes!');
+
+  const title = fragment.querySelector('.widgetHeaderTitle')?.innerHTML || '';
+
+  const widgetDate = fragment.querySelector('.widgetDate')?.innerHTML || '';
+
+  const rawTables = Array.from(
+    fragment.querySelectorAll('.panel-body.widgetContainerBody .panel.innerContainer')
+  );
+  const tables = rawTables.map((element): RatesMatrix => {
+    const heading =
+      element.querySelector('.panel-heading.innerContainerHeader .innerHeadingTitle_small')
+        ?.innerHTML || '';
+
+    const ratesTableRows = Array.from(element.querySelectorAll('.table.ratesTable tr.datarow'));
+    const ratesRows: Rates[] = ratesTableRows.map((row) => {
+      let td: Element[] | number[] = Array.from(row.querySelectorAll('td'));
+      td = td.map((td) => {
+        let maybeAnchor = td.querySelector('a');
+        if (maybeAnchor != null) {
+          return parseFloat(maybeAnchor.innerText);
+        }
+        return parseFloat(td.innerHTML);
+      });
+
+      const rateDetails = row.querySelector('td:last-of-type a')?.getAttribute('data-html-b64');
+      if (!rateDetails) {
+        throw new Error('No rate details found!');
+      }
+
+      const detailNodes = new DOMParser().parseFromString(atob(rateDetails), 'text/html');
+      if (detailNodes == null) {
+        throw new Error('Failed to parse rate details!');
+      }
+
+      const rateDetailsFrag = new DocumentFragment();
+      rateDetailsFrag.append(detailNodes.body.firstChild || 'No nodes!');
+      const modalFooter = rateDetailsFrag.querySelector('.modal-footer');
+      if (modalFooter != null) {
+        modalFooter.parentElement?.removeChild(modalFooter);
+      }
+
+      return {
+        rate: td[0],
+        points: td[1],
+        apr: td[2],
+        details: extractFragmentHTML(rateDetailsFrag)
+      };
+    });
+
+    return {
+      title: heading,
+      rates: ratesRows
+    };
+  });
+
+  const disclaimer = fragment.querySelector('.disclaimer')?.innerHTML || '';
+
+  const externalButton = fragment.querySelector('.btn.btn-block.externalLink');
+  const button = {
+    url: externalButton?.getAttribute('href') || '',
+    text: externalButton?.innerHTML || ''
+  };
+
+  return {
+    title: title,
+    ratesDate: widgetDate,
+    tables: tables,
+    disclaimer: disclaimer,
+    button: button
+  };
+}
 
 export default cornerstoneBankRatesHandler;
