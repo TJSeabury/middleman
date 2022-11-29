@@ -34,7 +34,7 @@ const manipulator = async (page: Page, browser: Browser) => {
       target => resolve(target.page())
     ));
     const popup = await newPagePromise;
-    await popup.waitForSelector('.modal-body');
+    await popup.waitForSelector('.modal-body .table');
     //await popup.waitForNetworkIdle({ idleTime: 100 });
 
     // extract and save popup content

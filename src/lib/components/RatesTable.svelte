@@ -91,5 +91,6 @@
 	a.show-details {
 		color: var(--cornerstonebank-red);
 		cursor: pointer;
+		text-decoration: underline;
 	}
 </style>
