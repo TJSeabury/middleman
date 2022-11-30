@@ -16,7 +16,6 @@ const add = (a: number, b: number): number => {
 
 export const GET: RequestHandler = withLogger(
   (routeParams) => {
-    return new Response(JSON.stringify(routeParams));
     const { url } = routeParams;
     const a = Number(url.searchParams.get('a') ?? '0');
     const b = Number(url.searchParams.get('b') ?? '1');
