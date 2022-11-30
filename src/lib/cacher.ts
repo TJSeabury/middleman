@@ -1,4 +1,10 @@
-import type { FunctionVariadicAnyReturn } from "./typesAndInterfaces";
+import { json } from '@sveltejs/kit';
+import type {
+  FunctionVariadicAnyReturn,
+  AsyncFunctionRoutehandlerAnyReturn,
+  RouteParams,
+  FunctionRoutehandlerAnyReturn
+} from "./typesAndInterfaces";
 import fs from 'fs';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -19,27 +25,23 @@ export function _filename(metaUrl: string): string {
 
 export default function withCache(f: FunctionVariadicAnyReturn): FunctionVariadicAnyReturn {
 
-  return async (...args) => {
+  return async (params: RouteParams) => {
+    const { route: { id } } = params;
 
-    const cacheKey = `withCacheTest/${a}+${b}`;
+    const cacheKey = id;
 
-    let fromCache = false;
-    let sum: number;
+    let result: any;
     if (cache.has(cacheKey)) {
-      sum = cache.get(cacheKey);
-      fromCache = true;
+      result = cache.get(cacheKey);
     }
     else {
-      sum = add(a, b);
-      cache.set(cacheKey, sum);
+      result = await f(params);
+      result = await result.json()
+      cache.set(cacheKey, result);
       Cache.set(cache);
     }
 
-
-
-    const result = await f(...args);
-
-    return result;
+    return json(result);
   };
 
 }
