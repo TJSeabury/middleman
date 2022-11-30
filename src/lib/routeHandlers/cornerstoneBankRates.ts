@@ -1,3 +1,4 @@
+import { error, json } from '@sveltejs/kit';
 import {
   extractDom,
   stripScriptsAndStyles,
@@ -99,7 +100,7 @@ const mutator = (dom: JSDOM): JSDOM => {
   return dom;
 }
 
-const cornerstoneBankRatesHandler = async (routeParams: any): Promise<RatesData> => {
+const cornerstoneBankRatesHandler = async (routeParams: any): Promise<Response> => {
   const res = await handlerBuilder(
     manipulator,
     mutator
@@ -107,12 +108,12 @@ const cornerstoneBankRatesHandler = async (routeParams: any): Promise<RatesData>
 
   const data = await res.json();
 
-  const nodes = new DOMParser().parseFromString(data, 'text/html');
-  if (nodes == null) {
-    throw new Error('Failed to parse data!');
+  const extractResult = extractDom(data);
+  if (isErr(extractResult)) {
+    console.error(extractResult.unwrapErr());
+    throw error(500, 'Failed to create vDOM. :c');
   }
-  const fragment = new DocumentFragment();
-  fragment.append(nodes.firstChild || 'No nodes!');
+  let fragment = extractResult.unwrap().window.document.documentElement;
 
   const title = fragment.querySelector('.widgetHeaderTitle')?.innerHTML || '';
 
@@ -132,7 +133,7 @@ const cornerstoneBankRatesHandler = async (routeParams: any): Promise<RatesData>
       td = td.map((td) => {
         let maybeAnchor = td.querySelector('a');
         if (maybeAnchor != null) {
-          return parseFloat(maybeAnchor.innerText);
+          return parseFloat(maybeAnchor.innerHTML);
         }
         return parseFloat(td.innerHTML);
       });
@@ -142,13 +143,13 @@ const cornerstoneBankRatesHandler = async (routeParams: any): Promise<RatesData>
         throw new Error('No rate details found!');
       }
 
-      const detailNodes = new DOMParser().parseFromString(atob(rateDetails), 'text/html');
-      if (detailNodes == null) {
-        throw new Error('Failed to parse rate details!');
+      const detailNodes = extractDom(atob(rateDetails));
+      if (isErr(detailNodes)) {
+        console.error(detailNodes.unwrapErr());
+        throw error(500, 'Failed to create vDOM. :c');
       }
+      let rateDetailsFrag = detailNodes.unwrap().window.document.documentElement;
 
-      const rateDetailsFrag = new DocumentFragment();
-      rateDetailsFrag.append(detailNodes.body.firstChild || 'No nodes!');
       const modalFooter = rateDetailsFrag.querySelector('.modal-footer');
       if (modalFooter != null) {
         modalFooter.parentElement?.removeChild(modalFooter);
@@ -176,13 +177,13 @@ const cornerstoneBankRatesHandler = async (routeParams: any): Promise<RatesData>
     text: externalButton?.innerHTML || ''
   };
 
-  return {
+  return json({
     title: title,
     ratesDate: widgetDate,
     tables: tables,
     disclaimer: disclaimer,
     button: button
-  };
+  });
 }
 
 export default cornerstoneBankRatesHandler;
