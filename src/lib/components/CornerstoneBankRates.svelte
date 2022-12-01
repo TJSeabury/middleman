@@ -3,6 +3,7 @@
 	import Spinner from '$lib/components/Spinner.svelte';
 	import RatesContainer from './RatesContainer.svelte';
 	import type { RatesMatrix } from '$lib/typesAndInterfaces';
+	import { onMount } from 'svelte';
 
 	const host = !dev ? 'https://middleman.marketmentors.com' : 'http://localhost:5173';
 
@@ -10,6 +11,7 @@
 		url: string;
 		text: string;
 	};
+
 	type RatesData = {
 		title: string;
 		ratesDate: string;
@@ -18,10 +20,11 @@
 		button: Button;
 	};
 
+	let data: RatesData | null = null;
+	let revalidating: boolean = false;
+
 	const apiRequest = async (): Promise<RatesData> => {
-		const target =
-			'https://consumer.optimalblue.com/FeaturedRates?GUID=b61565e4-69f1-4e5e-94cf-c9500181ed78';
-		const url = `${host}/api/cornerstonebank/rates/?url=${target}`;
+		const url = `${host}/api/cornerstonebank/rates`;
 		const res = await fetch(url);
 		if (res.status !== 200) {
 			console.error('No node or response.');
@@ -31,7 +34,21 @@
 		return data;
 	};
 
-	let APIRequest = apiRequest();
+	const onRevalidate = async () => {
+		revalidating = true;
+		const response = await fetch(`${host}/api/cornerstonebank/revalidate`);
+		const valid = await response.json();
+
+		if (!valid) {
+			data = await apiRequest();
+		}
+		revalidating = false;
+	};
+
+	onMount(async () => {
+		setInterval(onRevalidate, 1000 * 60 * 1);
+		data = await apiRequest();
+	});
 </script>
 
 <div class="flex-container">
@@ -40,14 +57,7 @@
 		frameborder="0"
 		title="data master"
 	/> -->
-	{#await APIRequest}
-		<Spinner
-			message="Please wait but a moment..."
-			color="rgb(77, 14, 8)"
-			comment="This shouldn't take long."
-			longWaitComment="Any second now..."
-		/>
-	{:then data}
+	{#if data}
 		<RatesContainer
 			title={data.title}
 			ratesDate={data.ratesDate}
@@ -55,8 +65,16 @@
 			externalLinkUrl={data.button.url}
 			externalLinkText={data.button.text}
 			ratesTables={data.tables}
+			{revalidating}
 		/>
-	{/await}
+	{:else}
+		<Spinner
+			message="Please wait but a moment..."
+			color="rgb(77, 14, 8)"
+			comment="This shouldn't take long."
+			longWaitComment="Any second now..."
+		/>
+	{/if}
 </div>
 
 <style>
