@@ -55,7 +55,6 @@ const manipulator = async (page: Page, browser: Browser) => {
     ));
     const popup = await newPagePromise;
     await popup.waitForSelector('.modal-body .table');
-    //await popup.waitForNetworkIdle({ idleTime: 100 });
 
     // extract and save popup content
     const html = await popup.content();
@@ -104,7 +103,9 @@ const cornerstoneBankRatesHandler = async (routeParams: any): Promise<Response> 
   const res = await handlerBuilder(
     manipulator,
     mutator
-  )(routeParams);
+  )({
+    url: 'https://consumer.optimalblue.com/FeaturedRates?GUID=b61565e4-69f1-4e5e-94cf-c9500181ed78'
+  });
 
   const data = await res.json();
 
