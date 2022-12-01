@@ -10,38 +10,52 @@ import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import Cache from '$lib/stores';
 
+type CachedHandlerAndKey = {
+  cachedHandler: FunctionVariadicAnyReturn,
+  invalidator: FunctionVariadicAnyReturn,
+  revalidator: FunctionVariadicAnyReturn,
+}
+
 let cache: Map<string, any>;
 Cache.subscribe((value) => {
   cache = value;
 });
 
-export function _dirname(metaUrl: string): string {
-  return dirname(fileURLToPath(metaUrl));
-}
+export default function withCache(
+  f: FunctionVariadicAnyReturn,
+  cacheKey: string,
+): CachedHandlerAndKey {
 
-export function _filename(metaUrl: string): string {
-  return fileURLToPath(metaUrl);
-}
+  const cachedHandler = async (params: RouteParams) => {
+    let response: any;
 
-export default function withCache(f: FunctionVariadicAnyReturn): FunctionVariadicAnyReturn {
-
-  return async (params: RouteParams) => {
-    const { route: { id } } = params;
-
-    const cacheKey = id;
-
-    let result: any;
     if (cache.has(cacheKey)) {
-      result = cache.get(cacheKey);
-    }
-    else {
-      result = await f(params);
-      result = await result.json()
-      cache.set(cacheKey, result);
+      response = cache.get(cacheKey);
+    } else {
+      response = await f(params);
+      response = await response.json();
+      cache.set(cacheKey, response);
       Cache.set(cache);
     }
 
-    return json(result);
+    return json(response);
+  };
+
+  const invalidator = async () => {
+    cache.delete(cacheKey);
+  };
+
+  const revalidator = async (params: RouteParams) => {
+    let response = await f(params);
+    response = await response.json();
+    cache.set(cacheKey, response);
+    Cache.set(cache);
+  };
+
+  return {
+    cachedHandler: cachedHandler,
+    invalidator: invalidator,
+    revalidator: revalidator,
   };
 
 }
