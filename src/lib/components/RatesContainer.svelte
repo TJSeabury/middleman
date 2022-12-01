@@ -4,24 +4,28 @@
 	import RateDetails from './RateDetails.svelte';
 	import type { SvelteComponent } from 'svelte';
 	import { fly } from 'svelte/transition';
+	import SimpleSpinner from './SimpleSpinner.svelte';
 
 	export let title: string;
 	export let ratesDate: string;
 	export let disclaimerText: string;
 	export let externalLinkUrl: string;
 	export let externalLinkText: string;
-
-	/* let date = new Date().toLocaleString('en-US', {
-		weekday: 'long',
-		year: 'numeric',
-		month: 'long',
-		day: 'numeric',
-		hour: 'numeric',
-		minute: 'numeric',
-		timeZone: 'America/New_York'
-	}); */
-
 	export let ratesTables: RatesMatrix[];
+	export let revalidating: boolean;
+
+	/* let date = new Date().toLocaleString(
+    'en-US',
+    {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      timeZone: 'America/New_York'
+	  }
+  ); */
 
 	let rateDetails: string = '';
 	let rateDetailsComponent: SvelteComponent;
@@ -35,6 +39,12 @@
 <div class="panel widgetContainer rates-container" transition:fly={{ y: 100, duration: 500 }}>
 	<header class="panel-heading widgetHeader">
 		<h1 class="widgetHeaderTitle">{title}</h1>
+		{#if revalidating}
+			<div class="revalidating-indicator">
+				<SimpleSpinner size={'24px'} color={'#ffffff'} />
+				<div style="min-width:max-content;color:white;">Checking for updated rates...</div>
+			</div>
+		{/if}
 		<p class="widgetDate ">{ratesDate}</p>
 	</header>
 
@@ -87,6 +97,11 @@
 		width: 100%;
 		margin: 0;
 		color: rgb(255, 255, 255);
+	}
+
+	.revalidating-indicator {
+		display: flex;
+		align-items: center;
 	}
 
 	.widgetDate {
