@@ -48,15 +48,11 @@
 	onMount(async () => {
 		setInterval(onRevalidate, 1000 * 60 * 1);
 		data = await apiRequest();
+		await onRevalidate();
 	});
 </script>
 
 <div class="flex-container">
-	<!-- <iframe
-		src="https://consumer.optimalblue.com/FeaturedRates?GUID=b61565e4-69f1-4e5e-94cf-c9500181ed78"
-		frameborder="0"
-		title="data master"
-	/> -->
 	{#if data}
 		<RatesContainer
 			title={data.title}
