@@ -24,7 +24,7 @@
 	let revalidating: boolean = false;
 
 	const apiRequest = async (): Promise<RatesData> => {
-		const url = `${host}/api/cornerstonebank/rates`;
+		const url = `/api/cornerstonebank/rates`;
 		const res = await fetch(url);
 		if (res.status !== 200) {
 			console.error('No node or response.');
@@ -36,7 +36,7 @@
 
 	const onRevalidate = async () => {
 		revalidating = true;
-		const response = await fetch(`${host}/api/cornerstonebank/revalidate`);
+		const response = await fetch(`/api/cornerstonebank/revalidate`);
 		const valid = await response.json();
 
 		if (!valid) {
