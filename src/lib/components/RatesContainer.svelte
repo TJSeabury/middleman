@@ -14,19 +14,6 @@
 	export let ratesTables: RatesMatrix[];
 	export let revalidating: boolean;
 
-	/* let date = new Date().toLocaleString(
-    'en-US',
-    {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      timeZone: 'America/New_York'
-	  }
-  ); */
-
 	let rateDetails: string = '';
 	let rateDetailsComponent: SvelteComponent;
 

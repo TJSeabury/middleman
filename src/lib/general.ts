@@ -9,3 +9,20 @@ export function pipe<T>(V: T, funcs: Array<(x: T) => T>) {
 }
 
 export const wait = (duration: number) => new Promise((res) => setTimeout(res, duration));
+
+export const datetimeNowEST = () => {
+  let date = new Date().toLocaleString(
+    'en-US',
+    {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      timeZone: 'America/New_York'
+    }
+  );
+
+  return date;
+}
