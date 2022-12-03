@@ -7,7 +7,6 @@ export const GET: RequestHandler = async () => {
   // check if rates have updated at source.
 
   if (!valid) {
-    await invalidate();
     await revalidate();
   }
 
