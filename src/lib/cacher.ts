@@ -26,6 +26,8 @@ export default function withCache(
   cacheKey: string,
 ): CachedHandlerAndKey {
 
+  let currentlyRevalidating: Promise<any> | null = null;
+
   const cachedHandler = async (params: RouteParams) => {
     let response: any;
 
@@ -46,10 +48,19 @@ export default function withCache(
   };
 
   const revalidator = async (params: RouteParams) => {
-    let response = await f(params);
-    response = await response.json();
-    cache.set(cacheKey, response);
-    Cache.set(cache);
+    if (currentlyRevalidating && currentlyRevalidating instanceof Promise) {
+      await currentlyRevalidating;
+    } else {
+      currentlyRevalidating = new Promise<void>(async (resolve, reject) => {
+        let response = await f(params);
+        response = await response.json();
+        cache.set(cacheKey, response);
+        Cache.set(cache);
+        resolve();
+      });
+      await currentlyRevalidating;
+      currentlyRevalidating = null;
+    }
   };
 
   return {
