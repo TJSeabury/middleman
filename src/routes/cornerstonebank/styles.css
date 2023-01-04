@@ -15,6 +15,10 @@
 	font-style: italic;
 }
 
+* {
+	box-sizing: border-box;
+}
+
 body {
 	margin: 0;
 	font-family: 'Montserrat', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
