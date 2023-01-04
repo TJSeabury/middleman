@@ -26,13 +26,15 @@
 <div class="panel widgetContainer rates-container" transition:fly={{ y: 100, duration: 500 }}>
 	<header class="panel-heading widgetHeader">
 		<h1 class="widgetHeaderTitle">{title}</h1>
-		{#if revalidating}
-			<div class="revalidating-indicator">
-				<SimpleSpinner size={'24px'} color={'#ffffff'} />
-				<div style="min-width:max-content;color:white;">Checking for updated rates...</div>
-			</div>
-		{/if}
-		<p class="widgetDate ">{ratesDate}</p>
+		<div class="widgetDate ">
+			{ratesDate}
+			{#if revalidating}
+				<div class="revalidating-indicator">
+					<SimpleSpinner size={'16px'} color={'#ffffff'} />
+					<div style="min-width:max-content;color:white;">Checking for updated rates...</div>
+				</div>
+			{/if}
+		</div>
 	</header>
 
 	<div class="panel-body widgetContainerBody">
@@ -44,7 +46,7 @@
 			{disclaimerText}
 		</p>
 		<a
-			class="btn btn-block externalLink  "
+			class="btn btn-block externalLink"
 			href={externalLinkUrl}
 			target="_blank"
 			rel="noreferrer"
@@ -56,7 +58,7 @@
 	<RateDetails bind:this={rateDetailsComponent} content={rateDetails} />
 </div>
 
-<style>
+<style lang="scss">
 	:root {
 		--cornerstonebank-red: #4d0e08;
 		--cornerstonebank-blue: #003b71;
@@ -77,12 +79,18 @@
 	.panel-heading.widgetHeader {
 		display: flex;
 		align-items: center;
+		@media (max-width: 520px) {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+		padding: 1rem;
 		background-color: rgb(77, 14, 8);
 		color: rgb(0, 0, 0);
 	}
 	.widgetHeaderTitle {
 		width: 100%;
 		margin: 0;
+		font-size: clamp(1.5rem, 1vmin, 2rem);
 		color: rgb(255, 255, 255);
 	}
 
@@ -92,16 +100,15 @@
 	}
 
 	.widgetDate {
-		display: block;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: flex-end;
 		width: 100%;
-		margin: 16px;
+		min-height: 4rem;
+		margin: 0;
+		padding: 0;
 		color: white;
-		text-align: right;
-	}
-
-	.widgetHeaderTitle {
-		padding: 1rem;
-		font-size: 2rem;
 	}
 
 	.disclaimer {
