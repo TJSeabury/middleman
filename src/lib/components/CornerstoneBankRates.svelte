@@ -46,7 +46,7 @@
 	};
 
 	onMount(async () => {
-		setInterval(onRevalidate, 1000 * 60 * 1);
+		setInterval(onRevalidate, 1000 * 60 * 5);
 		data = await apiRequest();
 		await onRevalidate();
 	});
