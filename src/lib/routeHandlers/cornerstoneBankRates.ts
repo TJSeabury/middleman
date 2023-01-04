@@ -1,3 +1,4 @@
+import { error, json } from '@sveltejs/kit';
 import {
   extractDom,
   stripScriptsAndStyles,
@@ -9,6 +10,25 @@ import {
 import type { JSDOM } from 'jsdom';
 import handlerBuilder from "./handlerBuilder";
 import type { Browser, Page } from 'puppeteer';
+import type { Rates, RatesMatrix } from '$lib/typesAndInterfaces';
+import { atob } from '$lib/general';
+
+type Button = {
+  url: string;
+  text: string;
+};
+
+type RatesData = {
+  title: string;
+  ratesDate: string;
+  tables: RatesMatrix[];
+  disclaimer: string;
+  button: Button;
+};
+
+function extractFragmentHTML(frag: DocumentFragment | HTMLElement) {
+  return [].map.call(frag.children, (element: HTMLElement) => element.outerHTML).join('\n');
+}
 
 /**
  * The browser page manipulator.
@@ -35,7 +55,6 @@ const manipulator = async (page: Page, browser: Browser) => {
     ));
     const popup = await newPagePromise;
     await popup.waitForSelector('.modal-body .table');
-    //await popup.waitForNetworkIdle({ idleTime: 100 });
 
     // extract and save popup content
     const html = await popup.content();
@@ -80,9 +99,92 @@ const mutator = (dom: JSDOM): JSDOM => {
   return dom;
 }
 
-const cornerstoneBankRatesHandler = handlerBuilder(
-  manipulator,
-  mutator
-);
+const cornerstoneBankRatesHandler = async (routeParams: any): Promise<Response> => {
+  const res = await handlerBuilder(
+    manipulator,
+    mutator
+  )({
+    url: 'https://consumer.optimalblue.com/FeaturedRates?GUID=b61565e4-69f1-4e5e-94cf-c9500181ed78'
+  });
+
+  const data = await res.json();
+
+  const extractResult = extractDom(data);
+  if (isErr(extractResult)) {
+    console.error(extractResult.unwrapErr());
+    throw error(500, 'Failed to create vDOM. :c');
+  }
+  let fragment = extractResult.unwrap().window.document.documentElement;
+
+  const title = fragment.querySelector('.widgetHeaderTitle')?.innerHTML || '';
+
+  const widgetDate = fragment.querySelector('.widgetDate')?.innerHTML || '';
+
+  const rawTables = Array.from(
+    fragment.querySelectorAll('.panel-body.widgetContainerBody .panel.innerContainer')
+  );
+  const tables = rawTables.map((element): RatesMatrix => {
+    const heading =
+      element.querySelector('.panel-heading.innerContainerHeader .innerHeadingTitle_small')
+        ?.innerHTML || '';
+
+    const ratesTableRows = Array.from(element.querySelectorAll('.table.ratesTable tr.datarow'));
+    const ratesRows: Rates[] = ratesTableRows.map((row) => {
+      let td: Element[] | number[] = Array.from(row.querySelectorAll('td'));
+      td = td.map((td) => {
+        let maybeAnchor = td.querySelector('a');
+        if (maybeAnchor != null) {
+          return parseFloat(maybeAnchor.innerHTML);
+        }
+        return parseFloat(td.innerHTML);
+      });
+
+      const rateDetails = row.querySelector('td:last-of-type a')?.getAttribute('data-html-b64');
+      if (!rateDetails) {
+        throw new Error('No rate details found!');
+      }
+
+      const detailNodes = extractDom(atob(rateDetails));
+      if (isErr(detailNodes)) {
+        console.error(detailNodes.unwrapErr());
+        throw error(500, 'Failed to create vDOM. :c');
+      }
+      let rateDetailsFrag = detailNodes.unwrap().window.document.documentElement;
+
+      const modalFooter = rateDetailsFrag.querySelector('.modal-footer');
+      if (modalFooter != null) {
+        modalFooter.parentElement?.removeChild(modalFooter);
+      }
+
+      return {
+        rate: td[0],
+        points: td[1],
+        apr: td[2],
+        details: extractFragmentHTML(rateDetailsFrag)
+      };
+    });
+
+    return {
+      title: heading,
+      rates: ratesRows
+    };
+  });
+
+  const disclaimer = fragment.querySelector('.disclaimer')?.innerHTML || '';
+
+  const externalButton = fragment.querySelector('.btn.btn-block.externalLink');
+  const button = {
+    url: externalButton?.getAttribute('href') || '',
+    text: externalButton?.innerHTML || ''
+  };
+
+  return json({
+    title: title,
+    ratesDate: widgetDate,
+    tables: tables,
+    disclaimer: disclaimer,
+    button: button
+  });
+}
 
 export default cornerstoneBankRatesHandler;

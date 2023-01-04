@@ -1,8 +1,18 @@
 import type { RequestHandler } from './$types';
 import withLogger, { _filename } from '$lib/logger';
 import cornerstoneBankRatesHandler from '$lib/routeHandlers/cornerstoneBankRates';
+import withCache from '$lib/cacher';
 
-export const GET: RequestHandler = withLogger(
+const {
+  cachedHandler,
+  invalidator,
+  revalidator
+} = withCache(
   async (routeParams) => await cornerstoneBankRatesHandler(routeParams),
-  _filename(import.meta.url)
+  '/api/cornerstonebank/rates'
 );
+
+export const invalidate = invalidator;
+export const revalidate = revalidator;
+
+export const GET: RequestHandler = cachedHandler;
