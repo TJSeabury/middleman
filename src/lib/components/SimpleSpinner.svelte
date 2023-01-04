@@ -25,7 +25,7 @@
 		position: relative;
 		width: var(--size);
 		height: var(--size);
-		margin: 16px 0;
+		margin: 0;
 	}
 	.spinner-outer,
 	.spinner-inner {
